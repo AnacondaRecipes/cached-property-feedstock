@@ -1,43 +1,54 @@
 {% set name = "cached-property" %}
-{% set version = "1.5.2" %}
-{% set sha256 = "9fa5755838eecbb2d234c3aa390bd80fbd3ac6b6869109bfc1b499f7bd89a130" %}
+{% set version = "2.0.1" %}
 
 package:
   name: {{ name|lower }}
   version: {{ version }}
 
 source:
-  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: {{ sha256 }}
+  url: https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/{{ name|replace('-', '_') }}-{{ version }}.tar.gz
+  sha256: 484d617105e3ee0e4f1f58725e72a8ef9e93deee462222dbd51cd91230897641
 
 build:
-  noarch: python
   number: 0
-  script: python -m pip install --no-deps --ignore-installed .
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  skip: true  # [py<38]
 
 requirements:
   host:
     - python
     - pip
+    - setuptools
+    - wheel
+    - twine
   run:
     - python
 
 test:
+  source_files:
+    - tests
   imports:
     - cached_property
+  requires:
+    - pip
+    - pytest >=8.3.3
+    - freezegun >=1.5.1
+  commands:
+    - pip check
+    - python -c "from importlib.metadata import version; assert(version('{{ name }}')=='{{ version }}')"
+    - pytest -v tests
 
 about:
   home: https://github.com/pydanny/cached-property
   license: BSD-3-Clause
   license_family: BSD
   license_file: LICENSE
-  summary: 'A decorator for caching properties in classes.'
+  summary: A decorator for caching properties in classes.
   description: |
     Cached-property is a decorator for caching properties in classes. It
     makes caching of time or computational expensive properties quick and easy.
-  doc_url: https://pypi.python.org/pypi/cached-property
+  doc_url: https://pypi.org/pypi/cached-property
   dev_url: https://github.com/pydanny/cached-property
-  doc_source_url: https://github.com/pydanny/cached-property/blob/master/README.rst
 
 extra:
   recipe-maintainers:
